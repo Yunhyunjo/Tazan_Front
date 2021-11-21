@@ -18,7 +18,7 @@ export default {
     replymanageItem,
   },
   created() {
-    this.$axios.get('/admin/comment/selectAll', {
+    this.$axios.get('/api/admin/comment/selectAll', {
           headers: {
             'Auth': localStorage.getItem('auth'),
           },
@@ -26,8 +26,8 @@ export default {
     )
         .then(result => {
           this.ReplyItemList = result.data
-          console.log(result.data)
-          console.log(result.data.nickName)
+          // console.log(result.data)
+          // console.log(result.data.nickName)
         })
         .catch(function (err) {
           console.log("에러발생: " + err)

@@ -22,8 +22,8 @@
         </div>
       </div>
       <div class="container-bottom mt-16">
-        <div sticky-container class="review-content">
-          <div v-sticky=true class="sticky mb-2">
+        <div class="review-content">
+          <div class="sticky mb-2">
             <h5 id="text">📗나의 여행 일기</h5>
           </div>
           <textarea class="form-control summernote reviewsummer" id="sm" rows="5"></textarea>
@@ -39,7 +39,6 @@
 <script>
 import TravelList from "./TravelList";
 import MyPlanModal from "./MyPlanModal";
-import Sticky from "vue-sticky-directive";
 
 export default {
   name: 'reviewwrite',
@@ -56,9 +55,14 @@ export default {
     }
   },
   created() {
+    if(!localStorage.getItem('auth')){
+      alert("로그인 후 이용해주세요.")
+      this.$router.push('/login')
+    }
     this.userName = localStorage.getItem('nickname')
     this.userID = localStorage.getItem('id')
     if(this.$route.params.planData){
+
       this.TourItemData = this.$route.params.planData;
       this.flag = true;
       this.ReviewData = this.$route.params.reviewData;
@@ -69,14 +73,13 @@ export default {
       }
     }
   },
-  directives: {Sticky},
   methods: {
     summernoteInsert() {
       window.$('.summernote').summernote('code',this.reviewContent);
     },
     selectedPlan(id) {
       this.flag = true;
-      this.$axios.get(`/planDetail/${id[0]}`).then(res => {
+      this.$axios.get(`/api/user/planDetail/${id[0]}`).then(res => {
         if(res.status == 200) {
           this.TourItemData = res.data
           this.flag = true;
@@ -90,7 +93,7 @@ export default {
         alert("에러발생 : " + err.response.message);
       })
       if(id[1] == '1'){
-        this.$axios.get(`/review/reviewWrite/${id[0]}`).then(res=> {
+        this.$axios.get(`/api/user/review/reviewWrite/${id[0]}`).then(res=> {
           if(res.status == 200){
             this.ReviewData = res.data;
             this.title = res.data.reviewTitle
@@ -151,11 +154,7 @@ export default {
       }
       if(this.editFlag){
         reviewVO.reviewID = this.ReviewData.reviewID
-        this.$axios.put(`/review/update`, reviewVO, {
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-          },
-        }).then(res => {
+        this.$axios.put(`/api/user/review/update`, reviewVO).then(res => {
           if (res.status === 200) {
             this.$router.push(`/reviewDetail/${this.ReviewData.reviewID}`).then((() =>window.scrollTo(0,0) ))
           }
@@ -169,11 +168,7 @@ export default {
         })
       }
       else{
-        this.$axios.post('/api/user/review/upload', reviewVO, {
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-          },
-        }).then(res => {
+        this.$axios.post('/api/user/review/upload', reviewVO).then(res => {
           if (res.status === 200) {
             this.$router.push(`/reviewDetail/${res.data}`).then((() =>window.scrollTo(0,0) ))
           }
@@ -183,6 +178,7 @@ export default {
           }
           else{
             alert("에러발생 : " + err.response.message);
+            console.log(err)
           }
         })
       }

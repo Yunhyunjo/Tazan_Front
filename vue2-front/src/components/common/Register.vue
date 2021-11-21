@@ -9,9 +9,7 @@
           <v-flex>
             <v-card flat class="mx-auto" max-width="800">
               <v-row style="margin-top: 60px">
-                <v-col
-
-                >
+                <v-col>
                   <v-form
                       class="mx-auto"
                       style="width: 400px; height: 700px">
@@ -49,10 +47,9 @@
                         <v-text-field
                             placeholder="비밀번호 확인"
                             type="password"
-                            v-model="passWordCheck"
+                            v-model="passwordCheck"
                             required
                             :rules="passWordRules"
-                            @blur="passwordCheckValid"
                         ></v-text-field>
                       </div>
                     </div>
@@ -176,25 +173,30 @@ export default {
     },
 
     register() {
-      let saveData = {};
-      saveData.email = this.email;
-      saveData.passWord = this.passWord;
-      saveData.nickName = this.nickName;
-      saveData.name = this.name;
-      saveData.phoneNumber = this.phoneNumber;
+      if(this.passWord != this.passwordCheck){
+        alert("비밀번호가 다릅니다.")
+      }
+      else{
+        let saveData = {};
+        saveData.email = this.email;
+        saveData.passWord = this.passWord;
+        saveData.nickName = this.nickName;
+        saveData.name = this.name;
+        saveData.phoneNumber = this.phoneNumber;
 
-      try {
-        this.$axios
-            .post("http://kosa3.iptime.org:50201/userJoin", JSON.stringify(saveData))
-            .then((res) => {
-              if (res.status === 201) { // 성공코드 : 201
-                console.log(res.data)
-              }
-            });
-        this.$router.push('/')
-        alert('회원가입 되었습니다!')
-      } catch (error) {
-        console.error(error);
+        try {
+          this.$axios
+              .post("/userJoin", JSON.stringify(saveData))
+              .then((res) => {
+                if (res.status === 201) { // 성공코드 : 201
+                  console.log(res.data)
+                }
+              });
+          this.$router.push('/login')
+          alert('회원가입 되었습니다!')
+        } catch (error) {
+          console.error(error);
+        }
       }
     },
   },

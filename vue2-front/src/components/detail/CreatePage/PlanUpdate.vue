@@ -2,9 +2,7 @@
   <div>
     <div class="main">
       <div class="uk-height-medium uk-flex uk-flex-center uk-flex-middle uk-background-cover uk-light"
-           data-src="https://images.unsplash.com/photo-1490822180406-880c226c150b?fit=crop&w=650&h=433&q=80"
-           data-srcset="https://images.unsplash.com/photo-1490822180406-880c226c150b?fit=crop&w=650&h=433&q=80 650w,
-                  https://images.unsplash.com/photo-1490822180406-880c226c150b?fit=crop&w=1300&h=866&q=80 1300w"
+           data-src="https://photo.coolenjoy.net/data/editor/1707/Bimg_20170718024901_dhqkcnyb.png"
            data-sizes="(min-width: 650px) 650px, 100vw" uk-img>
         <div class="container px-4 px-lg-5">
           <div class="text-center text-white">
@@ -18,22 +16,9 @@
                 <b-form-input
                     size="sm"
                     class="w-25 p-3 mb-1 text-black plantitle"
-                    placeholder="제목은 비워둘 수 없습니다."
+                    placeholder="제목작성"
                     :value="plan.planTitle"
                 ></b-form-input>
-<!--                -->
-<!--                <b-form-input
-                    id="input-live"
-                    v-model="name"
-                    :state="nameState"
-                    aria-describedby="input-live-help input-live-feedback"
-                    placeholder="여행 타이틀 입력"
-                    trim
-                ></b-form-input>
-                <b-form-invalid-feedback id="input-live-feedback">
-                  여행 제목 입력 (1자 이상 45자 이하)
-                </b-form-invalid-feedback>-->
-
               </div>
             </div>
           </div>
@@ -59,7 +44,6 @@
                   confirm
                   format="YYYY-MM-DD"
                   :placeholder="mydate"
-                  :shortcuts="shortcuts"
                   @change="updateddate"
               >
                 여행일자
@@ -104,9 +88,7 @@
           <v-card class="thr_main">
             <v-col class="thr_main_sub" v-for="(plan,index) in plan.planList" :key="index">
               <div class="thr_main_day">
-<!--                <h6>
-                  {{ index + 1 }} 일차
-                </h6>-->
+
                 <v-avatar
                     class="thr_main_day_list"
                 >
@@ -156,14 +138,9 @@ import DatePicker from "vue2-datepicker";
 
 export default {
   name: "UnkownPlanUpdate",
-  /*computed: {
-    nameState() {
-      return this.name.length > 0 ? true : false
-    }
-  },*/
+
   data() {
     return {
-      // name: '',
       lang: {
         formatLocale: {
           firstDayOfWeek: 1,
@@ -171,16 +148,7 @@ export default {
         monthBeforeYear: false,
       },
       mydate: '',
-      shortcuts: [
-        {
-          text: 'mydate',
-          onClick: () => {
-            this.range = [new Date(), new Date()]
-          }
-        }
-      ],
       recomList: [],
-      // planList_tour: [],
       planDate: [],
       planList: [],
       userId: '',
@@ -201,19 +169,20 @@ export default {
     this.planId = this.$route.params.planId;
     this.userId = localStorage.getItem('id');
 
-    this.$axios.get(`/planDetail/${this.planId}`)
+    this.$axios.get(`/api/user/planDetail/${this.planId}`)
         .then(res => {
           if (res.status == 200) {
             this.plan = res.data
-            var sd = new Date(this.plan.startDate)
-            this.startDate = sd.getFullYear() + "-" + (sd.getMonth() + 1) + "-" + sd.getDate();
-            this.defaultstartDate= sd.getFullYear() + "-" + (sd.getMonth() + 1) + "-" + sd.getDate();
-            var ed = new Date(this.plan.endDate)
-            this.endDate = ed.getFullYear() + "-" + (ed.getMonth() + 1) + "-" + ed.getDate();
-            this.defaultendDate=ed.getFullYear() + "-" + (ed.getMonth() + 1) + "-" + ed.getDate();
+
+            this.startDate = this.dateFormmatter(this.plan.startDate);
+            this.defaultstartDate= this.dateFormmatter(this.plan.startDate);
+
+
+            this.endDate = this.dateFormmatter(this.plan.endDate);
+            this.defaultendDate=this.dateFormmatter(this.plan.endDate);
             this.mydate = this.startDate + " - " + this.endDate
             this.cnt=this.plan.planList.length-1
-            this.$axios.get(`/search/${this.plan.region}`)
+            this.$axios.get(`/api/user/search/${this.plan.region}`)
                 .then(response => {
 
                   this.recomList = response.data;
@@ -237,19 +206,19 @@ export default {
       if (this.mydate == '') {
         alert('날짜를 먼저 선택해주세요')
       } else {
-        /*        this.totalPlan[this.cnt].push(result) // object
-                this.totalPlan_tour[this.cnt].push(result.tourId)*/
         this.plan.planList[this.cnt].push(result) // object
-        // this.planList_tour[this.cnt].push(result.tourId)
       }
     },
     updateddate() {
-      var sd = new Date(this.mydate_up[0])
-      this.mydate_up[0] = sd.getFullYear() + "-" + (sd.getMonth() + 1) + "-" + sd.getDate();
-      this.startDate= sd.getFullYear() + "-" + (sd.getMonth() + 1) + "-" + sd.getDate();
-      var ed = new Date(this.mydate_up[1])
-      this.mydate_up[1] = ed.getFullYear() + "-" + (ed.getMonth() + 1) + "-" + ed.getDate();
-      this.endDate= ed.getFullYear() + "-" + (ed.getMonth() + 1) + "-" + ed.getDate();
+
+      this.mydate_up[0] = this.dateFormmatter(this.mydate_up[0]);
+
+      this.startDate= this.dateFormmatter(this.mydate_up[0]);
+
+      this.mydate_up[1] = this.dateFormmatter(this.mydate_up[1]);
+
+      this.endDate= this.dateFormmatter(this.mydate_up[1]);
+
       this.mydate = this.startDate + " - " + this.endDate
     },
     dayList_add() {
@@ -265,7 +234,6 @@ export default {
         } else {
           this.cnt += 1
           this.plan.planList.push([])
-          // this.planList_tour.push([])
         }
       }
     },
@@ -285,11 +253,7 @@ export default {
       }
     },
     DeleteList(listObject) {
-      /*this.totalPlan[listObject.index1].splice(listObject.index2, 1)
-      this.totalPlan_tour[listObject.index1].splice(listObject.index2, 1)*/
       this.plan.planList[listObject.index1].splice(listObject.index2, 1)
-      // this.planList_tour[listObject.index1].splice(listObject.index2, 1)
-
     },
     UpdateWrite() {
 
@@ -324,11 +288,7 @@ export default {
 
 
         if (confirm("저장 하시겠습니까?")) {
-          this.$axios.put('/plan/planUpdate', planVO, {
-            headers: {
-              'Content-Type': 'application/json; charset=utf-8',
-            },
-          }).then(request => {
+          this.$axios.put('/api/user/plan/planUpdate', planVO).then(request => {
             if (request.status === 200) {
               this.$router.push(`/planDetail/${this.plan.planID}`)
             }
@@ -338,6 +298,21 @@ export default {
         }
       }
     },
+    dateFormmatter(date){
+      var temp = new Date(date)
+      var year = temp.getFullYear();
+      var month = temp.getMonth() + 1;
+      var day = temp.getDate();
+
+      if (month < 10) {
+        month = '0' + month;
+      }
+      if (day < 10) {
+        day = '0' + day;
+      }
+      return(year + '-' + month + '-' + day);
+
+    }
   },
   components: {
     DayList,
@@ -354,6 +329,15 @@ export default {
 }
 .recom_f {
   font-weight: 1000 !important;
+}
+.text-black {
+  text-align: left;
+}
+.w-25 {
+  width: 35% !important;
+}
+.p-3 {
+  padding: 1rem !important;
 }
 .sub_main {
   display: flex;
@@ -385,13 +369,6 @@ export default {
   width:100%
 }
 
-/*.thr_main .sub_main {
-  border: 1px solid black;
-  padding: 0.25em;
-  margin: 0.25em;
-  border-radius: 0.25em;
-}*/
-
 .sub_title {
   display: flex;
   justify-content: center;
@@ -412,8 +389,6 @@ export default {
   width: 25%;
   height: 100%;
   flex-direction: column;
-  /**/
-  /*border: 1px solid black;*/
   padding: 0.25em;
   margin: 0.25em;
   border-radius: 0.25em;
@@ -424,8 +399,6 @@ export default {
   width: 100%;
   height: 100%;
   flex-direction: column;
-  /**/
-  /*border: 1px solid black;*/
   padding: 0.25em;
   margin: 0.25em;
   border-radius: 0.25em;
@@ -436,8 +409,6 @@ export default {
   flex-direction: column;
   width: 65%;
   height: 100%;
-  /**/
-  /*border: 1px solid black;*/
   padding: 0.25em;
   margin: 0.25em;
   border-radius: 0.25em;
@@ -446,8 +417,6 @@ export default {
 .right {
   width: 20%;
   height: 100%;
-  /**/
-  /*border: 1px solid black;*/
   padding: 0.25em;
   margin: 0.25em;
   border-radius: 0.25em;
@@ -456,9 +425,6 @@ export default {
 .right_list {
   width: 100%;
   height: 100%;
-  /*justify-content: left;*/
-  /*display: flex;*/
-  /*flex-direction: row;*/
 }
 
 
@@ -473,7 +439,6 @@ export default {
   width: 100px;
   text-align: center;
   flex-wrap: nowrap;
-  /*justify-content: space-around;*/
   font-size: 1rem;
   font-weight: 700;
   color: #5dc9dd;
@@ -482,15 +447,11 @@ export default {
 }
 
 .thr_main_list {
-  /*height: 5px;*/
   overflow-x: auto;
-  /*overflow-x: scroll;*/
   display: flex;
   width: 963px;
   text-align: left;
   height: inherit;
-  /**/
-  /*border: 1px solid black;*/
   padding: 0.25em;
   margin: 0.25em;
   border-radius: 0.25em;
@@ -516,9 +477,7 @@ export default {
 
 .save_plan {
   display: flex;
-  /*width: 1000px;*/
   justify-content: space-between;
-  /**/
   padding: 0.25em;
   margin: 0.25em;
   border-radius: 0.25em;

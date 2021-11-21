@@ -60,24 +60,15 @@ export default {
     this.userID = localStorage.getItem('id')
     this.nickName = localStorage.getItem('nickname')
     this.reviewID = this.$route.params.reviewId
-    console.log(localStorage.getItem('Authorization'))
     this.$axios.get(`/review/${this.reviewID}`).then(res => {
       if (res.status === 200) {
-        this.Review = res.data
+        this.Review = res.data.reviewVO
         this.Review.reviewDate = this.Review.reviewDate.substr(0, 10)
+        this.reviewUserID = this.Review.userID
         if (res.data.commentVO != '') {
-          this.CommentsData = res.data.commentVO
+          this.CommentsData = this.Review.commentVO
         }
-
-        this.$axios.get(`/planDetail/${res.data.planID}`).then(res => {
-          if (res.status == 200) {
-            this.TourItemData = res.data;
-            this.reviewUserID = res.data.userID;
-          }
-        }).catch(err => {
-          //에러 처리 할 곳
-          alert("에러발생 : " + err.response.message);
-        })
+        this.TourItemData = res.data.planVO;
       }
     }).catch(function (err) {
       //에러 처리 할 곳
@@ -87,7 +78,7 @@ export default {
   methods: {
     deleteReview() {
       if(confirm("후기를 삭제하시겠습니까?")){
-        this.$axios.delete(`/reviewDelete/${this.reviewID}/${this.Review.planID}`).then(res => {
+        this.$axios.delete(`/api/user/reviewDelete/${this.reviewID}/${this.Review.planID}`).then(res => {
           if (res.status == 200) {
             alert("후기를 삭제했습니다.");
             this.$router.push('/reviewList').then((() => window.scrollTo(0, 0)))
@@ -112,7 +103,7 @@ export default {
       commentVO.reviewID = this.reviewID
 
       commentVO.commentContent = document.getElementsByClassName("comment-content").item(0).innerHTML
-      this.$axios.post('/comment/create', commentVO, {
+      this.$axios.post('/api/user/comment/create', commentVO, {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
         },
@@ -129,7 +120,7 @@ export default {
       commentVO.commentID = comment[0]
       commentVO.commentContent = comment[1]
       if(confirm("수정하시겠습니까?")){
-        this.$axios.put(`/comment/update`, commentVO).then(res => {
+        this.$axios.put(`/api/user/comment/update`, commentVO).then(res => {
           if(res.status == 200){
             alert("댓글을 수정했습니다.")
           }
@@ -140,7 +131,7 @@ export default {
     },
     deleteComment(arr) {
       if (confirm("정말 삭제하시겠습니까?")) {
-        this.$axios.delete(`/comment/delete/${arr[0]}`).then(res => {
+        this.$axios.delete(`/api/user/comment/delete/${arr[0]}`).then(res => {
           if (res.status == 200) {
             alert("댓글을 삭제하였습니다.")
             this.CommentsData.splice(arr[1], 1);
@@ -151,7 +142,7 @@ export default {
       }
     },
     reportComment(id){
-      this.$axios.get(`/comment/report/update/${id}/${this.userID}`).then(res=>{
+      this.$axios.get(`/api/user/comment/report/update/${id}/${this.userID}`).then(res=>{
         if(res.status == 200){
           alert("댓글을 신고하였습니다.")
         }

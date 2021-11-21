@@ -44,7 +44,7 @@ export default {
   },
   methods:{
     removeItem(){
-      this.$axios.delete(`/reviewDelete/${this.item.reviewID}`).then(res => {
+      this.$axios.delete(`/api/user/reviewDelete/${this.item.reviewID}/${this.item.planID}`).then(res => {
         if (res.status == 200) {
           alert("Review삭제.");
           location.reload();
@@ -55,7 +55,7 @@ export default {
     }
   },
   created() {
-    this.$axios.get(`/user/getUser/${this.item.userID}`).then(res => {
+    this.$axios.get(`/api/admin/user/getUser/${this.item.userID}`).then(res => {
       this.user=res.data
     }).catch( err => {
       console.log(err)
